@@ -1,6 +1,5 @@
 package com.qatester.hub.controller;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
@@ -8,14 +7,10 @@ import org.springframework.web.bind.annotation.*;
 import java.security.MessageDigest;
 import java.util.*;
 
-/**
- * Controller for Task 7 - Duplicate Bet Investigation
- */
 @Controller
 public class Task7Controller {
 
     private final Map<String, Long> recentRequestHashes = new HashMap<>();
-    private final ObjectMapper objectMapper = new ObjectMapper();
     private final Random random = new Random();
 
     @GetMapping("/task7")
@@ -27,23 +22,16 @@ public class Task7Controller {
     @ResponseBody
     public ResponseEntity<Map<String, Object>> placeBet(
             @PathVariable String brandId,
-            @RequestBody String rawBody,
-            @RequestHeader(value = "Content-Type", required = false) String contentType) {
+            @RequestBody List<Map<String, Object>> bets) {
 
-        // Check if JSON
-        if (contentType == null || !contentType.contains("application/json")) {
+        if (bets == null || bets.isEmpty()) {
             return ResponseEntity.ok(Map.of(
                     "accepted", Collections.emptyList(),
-                    "error", List.of(Map.of("code", 100, "message", "Invalid JSON"))
+                    "error", List.of(Map.of("code", 100, "message", "Invalid request format"))
             ));
         }
 
         try {
-            List<Map<String, Object>> bets = objectMapper.readValue(rawBody, List.class);
-            if (bets == null || bets.isEmpty()) {
-                throw new IllegalArgumentException("Expected non-empty array");
-            }
-
             Map<String, Object> firstBet = bets.get(0);
             String betRequestId = (String) firstBet.get("bet_request_id");
 
@@ -54,12 +42,11 @@ public class Task7Controller {
                 ));
             }
 
-            // Calculate hash for duplicate detection
-            String bodyHash = sha256(rawBody);
+            String bodyHash = sha256(betRequestId);
             long currentTime = System.currentTimeMillis() / 1000;
 
             Long lastTime = recentRequestHashes.get(bodyHash);
-            if (lastTime != null && currentTime - lastTime < 5) {
+            if (lastTime != null && currentTime - lastTime < 7) {
                 return ResponseEntity.ok(Map.of(
                         "accepted", Collections.emptyList(),
                         "error", List.of(Map.of(
