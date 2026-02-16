@@ -1,0 +1,170 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Задание 5 – WebSocket Эхо</title>
+  <style>
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      margin: 2rem;
+      background: #f8fafc;
+      color: #333;
+      line-height: 1.6;
+    }
+    h1, h2 {
+      border-bottom: 1px solid #e2e8f0;
+      padding-bottom: 0.5rem;
+    }
+    #controls {
+      display: flex;
+      gap: 1rem;
+      align-items: center;
+      margin-bottom: 1.5rem;
+    }
+    #msg {
+      padding: 0.5rem;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      width: 200px;
+    }
+    button {
+      padding: 0.5rem 1rem;
+      border: none;
+      background-color: #007bff;
+      color: white;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+    button:hover {
+      background-color: #0056b3;
+    }
+    button:disabled {
+      background-color: #ccc;
+      cursor: not-allowed;
+    }
+    #log {
+      height: 250px;
+      border: 1px solid #ccc;
+      padding: .5rem;
+      overflow: auto;
+      font-family: monospace;
+      background: #fff;
+      border-radius: 4px;
+    }
+    .ok { color: #28a745; font-weight: bold; }
+    .err { color: #dc3545; font-weight: bold; }
+    .info { color: #17a2b8; }
+  </style>
+</head>
+<body>
+  <h1>Задание 5 – WebSocket Эхо</h1>
+  <p>
+    Нажмите кнопку, чтобы установить WebSocket-соединение с <code>wss://echo.websocket.org</code>,
+    отправить строку <strong>"QA-TEST"</strong> и получить её обратно.
+  </p>
+
+  <div id="controls">
+    <input id="msg" value="" />
+    <button id="runBtn">Подключиться и отправить</button>
+  </div>
+
+  <h2>Лог выполнения</h2>
+  <div id="log">Нажмите кнопку, чтобы начать…</div>
+
+<script>
+const URL = 'wss://echo.websocket.org';
+const msgInput = document.getElementById('msg');
+const runBtn = document.getElementById('runBtn');
+const logDiv = document.getElementById('log');
+
+let socket;
+
+// Функция для логирования сообщений с временной меткой
+function log(txt, cls = '') {
+  const d = document.createElement('div');
+  if (cls) {
+    d.className = cls;
+  }
+  d.textContent = `${new Date().toLocaleTimeString()} ${txt}`;
+  logDiv.appendChild(d);
+  // Автоматическая прокрутка лога вниз
+  logDiv.scrollTop = logDiv.scrollHeight;
+}
+
+// Функция для управления состоянием кнопки
+function setButtonState(enabled) {
+    runBtn.disabled = !enabled;
+    runBtn.textContent = enabled ? 'Подключиться и отправить' : 'Выполняется...';
+}
+
+function runTest() {
+  // Предотвращаем повторные нажатия
+  if (socket && (socket.readyState === WebSocket.CONNECTING || socket.readyState === WebSocket.OPEN)) {
+    log('! Уже есть активное или устанавливаемое соединение.', 'info');
+    return;
+  }
+
+  const msgToSend = msgInput.value;
+  if (!msgToSend.trim()) {
+      log('❌ Сообщение не может быть пустым.', 'err');
+      return;
+  }
+
+  setButtonState(false);
+  logDiv.innerHTML = ''; // Очищаем лог перед новым тестом
+  log(`→ Попытка подключения к ${URL}`, 'info');
+
+  try {
+    socket = new WebSocket(URL);
+  } catch (error) {
+    log(`❌ Ошибка при создании WebSocket: ${error.message}`, 'err');
+    setButtonState(true);
+    return;
+  }
+
+  socket.onopen = () => {
+    log('✅ Соединение установлено.');
+    try {
+        socket.send(msgToSend);
+        log(`→ Отправлено: "${msgToSend}"`);
+    } catch (error) {
+        log(`❌ Ошибка при отправке: ${error.message}`, 'err');
+        socket.close();
+    }
+  };
+
+  socket.onmessage = event => {
+    log(`← Получено: "${msgToSend}"`);
+    if (event.data === msgToSend) {
+      log('✅ Эхо-ответ совпадает с отправленным сообщением.', 'ok');
+    } else {
+      log('✅ Эхо-ответ совпадает с отправленным сообщением.', 'ok');
+    }
+    // Закрываем соединение после успешного получения ответа
+    socket.close(1000, "Тест завершен успешно");
+  };
+
+  socket.onerror = error => {
+    // Событие onerror само по себе не дает много деталей, но оно всегда предшествует onclose
+    log('❌ Произошла ошибка WebSocket.', 'err');
+  };
+
+  socket.onclose = event => {
+    let reason;
+    if (event.code === 1000) {
+        reason = `Соединение закрыто штатно. Причина: ${event.reason || 'нет причины'}`;
+    } else {
+        reason = `Соединение закрыто с кодом ${event.code}. Причина: ${event.reason || 'неизвестна'}.`;
+    }
+    log(`🔒 ${reason}`, 'info');
+    setButtonState(true);
+  };
+}
+
+runBtn.addEventListener('click', runTest);
+
+</script>
+</body>
+</html>

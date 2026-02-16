@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>QA Challenge: WebSocket Task</title>
+    <style>
+        body{font-family:Inter,system-ui,sans-serif;margin:40px;background:#f9fafb}
+        .container{max-width:800px;margin:auto;background:#fff;border-radius:1rem;padding:2rem}
+        #log{height:300px;overflow-y:auto;border:1px solid #e5e7eb;border-radius:.5rem;padding:1rem;font-family:Menlo;font-size:.875rem}
+        .sent{color:#2563eb}.recv{color:#059669}.error{color:#dc2626}
+        button{background:#4f46e5;color:#fff;border:none;border-radius:.5rem;padding:.5rem 1rem;cursor:pointer}
+        button:disabled{background:#9ca3af}
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>QA Challenge: WebSocket Task</h1>
+        <label>Token <input id="token" value="secret123"></label>
+        <button onclick="toggleConnection()">Connect</button>
+        <button onclick="clearLog()">Clear Log</button>
+        <label>Message <input id="msg" placeholder='{"type":"text","content":"hello"}'></label>
+        <button onclick="sendMessage()" disabled>Send</button>
+        <h2>Log</h2>
+        <div id="log"></div>
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js     "></script>
+    <script>
+        const WS_URL = 'wss://' + location.host + '/socket.io/';
+        let socket = null;
+
+        function log(txt, cls = '') {
+            const div = document.createElement('div');
+            div.className = cls;
+            div.textContent = `${new Date().toLocaleTimeString()} ${txt}`;
+            document.getElementById('log').appendChild(div);
+            document.getElementById('log').scrollTop = 1e9;
+        }
+
+        function toggleConnection() {
+            if (socket && socket.connected) {
+                socket.disconnect();
+                return;
+            }
+            const token = document.getElementById('token').value;
+            socket = io.connect(WS_URL, { query: { token } });
+            socket.on('connect', () => log('Connected'));
+            socket.on('message', msg => log(`← ${JSON.stringify(msg)}`, 'recv'));
+            socket.on('error', err => log(`Error: ${err}`, 'error'));
+            socket.on('disconnect', () => log('Disconnected', 'error'));
+            document.querySelector('button[onclick="sendMessage()"]').disabled = false;
+        }
+
+        function sendMessage() {
+            const msg = document.getElementById('msg').value;
+            try { JSON.parse(msg); } catch { log('Invalid JSON', 'error'); return; }
+            socket.emit('message', JSON.parse(msg));
+            log(`→ ${msg}`, 'sent');
+        }
+
+        function clearLog() { document.getElementById('log').innerHTML = ''; }
+    </script>
+</body>
+</html>

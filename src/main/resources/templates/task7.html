@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Задание 7: Ошибка дубликата ставки</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            margin: 40px;
+            line-height: 1.6;
+            background: #fafafa;
+            color: #333;
+        }
+        .email {
+            max-width: 800px;
+            background: white;
+            padding: 25px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        .signature {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+        }
+        pre {
+            background: #2d2d2d;
+            color: #f8f8f2;
+            padding: 16px;
+            border-radius: 6px;
+            overflow-x: auto;
+            font-size: 14px;
+            margin: 15px 0;
+        }
+        code {
+            background: #f1f1f1;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: monospace;
+        }
+        .note {
+            background: #fff8e1;
+            padding: 12px;
+            border-left: 4px solid #ffc107;
+            margin: 20px 0;
+        }
+        .response {
+            background: #f9f9f9;
+            padding: 12px;
+            border-left: 3px solid #555;
+            font-family: monospace;
+            white-space: pre;
+            overflow-x: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="email">
+        <h2>🚨 Срочно: Клиент жалуется, что ставка отклоняется</h2>
+
+        <p>Привет, QA!</p>
+
+        <p>К нам поступила жалоба от клиента: каждая вторая попытка поставить ставку завершается ошибкой</p>
+
+
+        <p>Служба поддержки запросила у клиента логи и получила точный запрос, который вызывает проблему:</p>
+
+        <pre id="curl-command">curl 'API_URL/api/v2/coupon/brand/1653815133341880320/bet/place' \
+  -H 'Content-Type: application/json' \
+  --data-raw '[{"type":"1/1","sum":"10","k":"1.35","global_id":null,"bonus_id":null,"bet_request_id":"2586919690874003494-1--1","odds_change":"higher","selections":[{"event_id":"2586919690874003494","market_id":"1","specifiers":"","outcome_id":"1","k":"1.35","source":{"layout":"sidebar","page":"/","section":"Top","extra":{"market":"Event Plate","timeFilter":"","banner_type":"BetbyAI 2.0","tab":"1"}},"promo_id":null,"bonus_id":null,"timestamp":1761495788929}]}]'</pre>
+
+        <div class="note">
+            <strong>Ваша задача:</strong><br>
+            • Воспроизвести проблему с помощью приведённого curl-запроса.<br>
+            • Попытаться разобраться в проблеме (и проблема ли это).<br>
+        </div>
+
+        <p>Пожалуйста, проведите расследование <strong>как можно скорее</strong> и пришлите выводы.</p>
+
+        <div class="signature">
+            <p>С уважением,<br>
+            <strong>Команда технической поддержки</strong><br>
+            <em>Betting Platform</em></p>
+        </div>
+    </div>
+
+    <script>
+        // Replace API_URL with actual host
+        document.getElementById('curl-command').textContent = 
+            document.getElementById('curl-command').textContent.replace('API_URL', window.location.origin);
+    </script>
+</body>
+</html>

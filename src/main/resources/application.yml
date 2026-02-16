@@ -1,0 +1,19 @@
+server:
+  port: ${PORT:8080}
+
+spring:
+  application:
+    name: qa-tester-hub
+  thymeleaf:
+    cache: false
+    prefix: classpath:/templates/
+    suffix: .html
+  web:
+    resources:
+      static-locations: classpath:/static/
+
+# GraphQL endpoint
+graphql:
+  servlet:
+    mapping: /graphql
+    enabled: true

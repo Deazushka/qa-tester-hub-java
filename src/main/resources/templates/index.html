@@ -1,0 +1,342 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8"/>
+  <title>QA Tester Hub</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    :root {
+      --accent: #6366f1;
+      --accent-dark: #4f46e5;
+      --accent-glow: rgba(99, 102, 241, 0.3 );
+      --bg: #f8fafc;
+      --card: #ffffff;
+      --text-primary: #1e293b;
+      --text-secondary: #64748b;
+      --border: #e2e8f0;
+      --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+      --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+      --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
+      --success: #10b981;
+      --error: #ef4444;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: "Inter", system-ui, sans-serif;
+      background-color: var(--bg);
+      display: flex;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 2rem 1rem;
+      color: var(--text-primary);
+      background-image: radial-gradient(var(--border) 1px, transparent 1px);
+      background-size: 24px 24px;
+    }
+
+    .wrapper {
+      width: 100%;
+      max-width: 640px;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 3rem;
+      animation: fadeIn 0.5s ease-out forwards;
+    }
+
+    h1 {
+      font-weight: 700;
+      font-size: 2.75rem;
+      letter-spacing: -0.04em;
+      margin-bottom: 0.75rem;
+      background: linear-gradient(120deg, var(--accent) 30%, #a855f7 100%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      background-size: 200% 200%;
+      animation: gradient-animation 4s ease infinite;
+    }
+
+    @keyframes gradient-animation {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    .subtitle {
+      color: var(--text-secondary);
+      font-size: 1.125rem;
+      line-height: 1.6;
+      max-width: 500px;
+      margin: 0 auto;
+    }
+
+    main {
+      display: grid;
+      gap: 1.5rem;
+    }
+
+    .card {
+      display: block;
+      padding: 1.75rem;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 1rem;
+      text-decoration: none;
+      color: var(--text-primary);
+      transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+      box-shadow: var(--shadow-md);
+      position: relative;
+      overflow: hidden;
+      opacity: 0;
+      transform: translateY(20px);
+      animation: slideUpFadeIn 0.5s ease-out forwards;
+    }
+
+    /* Анимация появления карточек с задержкой */
+    .card:nth-child(1) { animation-delay: 0.1s; }
+    .card:nth-child(2) { animation-delay: 0.15s; }
+    .card:nth-child(3) { animation-delay: 0.2s; }
+    .card:nth-child(4) { animation-delay: 0.25s; }
+    .card:nth-child(5) { animation-delay: 0.3s; }
+    .card:nth-child(6) { animation-delay: 0.35s; }
+    .card:nth-child(7) { animation-delay: 0.4s; }
+
+    @keyframes slideUpFadeIn {
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes fadeIn {
+      to { opacity: 1; }
+    }
+
+    .card:hover {
+      transform: translateY(-5px);
+      border-color: var(--accent);
+      box-shadow: var(--shadow-lg), 0 0 20px var(--accent-glow);
+    }
+
+    .card-header {
+      display: flex;
+      align-items: center;
+      margin-bottom: 0.75rem;
+    }
+
+    .card-icon {
+      flex-shrink: 0;
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      background: var(--bg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-right: 1rem;
+      color: var(--accent);
+      font-size: 1.2rem;
+      transition: background-color 0.3s ease, color 0.3s ease;
+    }
+
+    .card:hover .card-icon {
+      background-color: var(--accent);
+      color: white;
+    }
+
+    .card-title {
+      font-weight: 600;
+      font-size: 1.1rem;
+      margin-bottom: 0.1rem;
+    }
+
+    .card-desc {
+      color: var(--text-secondary);
+      font-size: 0.9rem;
+      line-height: 1.5;
+    }
+
+    .card-tag {
+      display: inline-block;
+      background: var(--bg);
+      color: var(--text-secondary);
+      font-size: 0.8rem;
+      font-weight: 500;
+      padding: 0.25rem 0.75rem;
+      border-radius: 999px;
+      margin-top: 1rem;
+      transition: background-color 0.3s ease, color 0.3s ease;
+    }
+
+    .card:hover .card-tag {
+        background-color: var(--accent);
+        color: white;
+    }
+
+    footer {
+      text-align: center;
+      margin-top: 4rem;
+      color: var(--text-secondary);
+      font-size: 0.9rem;
+      opacity: 0;
+      animation: fadeIn 0.5s 0.8s ease-out forwards;
+    }
+
+    @media (max-width: 600px) {
+      body { padding: 1.5rem 1rem; }
+      h1 { font-size: 2.25rem; }
+      .subtitle { font-size: 1rem; }
+      .card { padding: 1.5rem; }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrapper">
+    <header>
+      <h1>QA Tester Hub</h1>
+      <!--<p class="subtitle">Платформа для оттачивания навыков тестирования. Выберите задание, чтобы начать.</p>-->
+    </header>
+
+<main>
+  <a href="/task0" class="card">
+    <div class="card-header">
+      <div class="card-icon"><span class="fa-solid fa-code fa-fw"></span></div>
+      <div>
+        <div class="card-title">Task 0 – Bug-hunt JSON response</div>
+        <div class="card-desc">Ответ в формате JSON</div>
+      </div>
+    </div>
+    <span class="card-tag">API Testing</span>
+  </a>
+
+  <a href="/task1" class="card">
+    <div class="card-header">
+      <div class="card-icon"><span class="fa-solid fa-user-edit fa-fw"></span></div>
+      <div>
+        <div class="card-title">Task 1 – Bug-hunt Form</div>
+        <div class="card-desc">Найдите баги в форме регистрации</div>
+      </div>
+    </div>
+    <span class="card-tag">UI Testing</span>
+  </a>
+
+  <a href="/task2" class="card">
+    <div class="card-header">
+      <div class="card-icon"><span class="fa-solid fa-bolt fa-fw"></span></div>
+      <div>
+        <div class="card-title">Task 2 – Bug-hunt Sockets</div>
+        <div class="card-desc">Реал-тайм–тестирование WebSocket-соединений</div>
+      </div>
+    </div>
+    <span class="card-tag">Real-time</span>
+  </a>
+
+  <a href="/task3" class="card">
+    <div class="card-header">
+      <div class="card-icon"><span class="fa-solid fa-project-diagram fa-fw"></span></div>
+      <div>
+        <div class="card-title">Task 3 – Schema Explorer</div>
+        <div class="card-desc">Check знаний GraphQL схем</div>
+      </div>
+    </div>
+    <span class="card-tag">GraphQL</span>
+  </a>
+
+  <a href="/task4" class="card">
+    <div class="card-header">
+      <div class="card-icon"><span class="fa-solid fa-thumbs-up fa-fw"></span></div>
+      <div>
+        <div class="card-title">Task 4 – Image Like / Dislike</div>
+        <div class="card-desc">Оцените изображение: good or bad</div>
+      </div>
+    </div>
+    <span class="card-tag">User Interaction</span>
+  </a>
+
+  <a href="/task5" class="card">
+    <div class="card-header">
+      <div class="card-icon"><span class="fa-solid fa-exchange-alt fa-fw"></span></div>
+      <div>
+        <div class="card-title">Task 5 – WebSocket Echo</div>
+        <div class="card-desc">Public wss</div>
+      </div>
+    </div>
+    <span class="card-tag">Networking</span>
+  </a>
+
+  <a href="/task6" class="card">
+    <div class="card-header">
+      <div class="card-icon"><span class="fa-solid fa-flag-checkered fa-fw"></span></div>
+      <div>
+        <div class="card-title">Task 6 – Bet-Builder Flag Rules Check</div>
+        <div class="card-desc">Чек-лист для проверки новой логики флага</div>
+      </div>
+    </div>
+    <span class="card-tag">Business Logic</span>
+  </a>
+
+  <!-- ✅ ПРАВИЛЬНЫЙ Task 7 -->
+  <a href="/task7" class="card">
+    <div class="card-header">
+      <div class="card-icon"><span class="fa-solid fa-exclamation-triangle fa-fw"></span></div>
+      <div>
+        <div class="card-title">Task 7 – Incident: Ошибка дубликата ставки</div>
+        <div class="card-desc">Расследуйте, почему ставка отклоняется</div>
+      </div>
+    </div>
+    <span class="card-tag">Analysis</span>
+  </a>
+
+  <!-- ✅ Task 8 -->
+  <a href="/task8" class="card">
+    <div class="card-header">
+      <div class="card-icon"><span class="fa-solid fa-right-left fa-fw"></span></div>
+      <div>
+        <div class="card-title">Task 8 – Microservice Integration</div>
+        <div class="card-desc">Тестирование API с помощью Postman</div>
+      </div>
+    </div>
+    <span class="card-tag">API Integration</span>
+  </a>
+
+  <!-- ✅ Task 9 -->
+  <a href="/task9" class="card">
+    <div class="card-header">
+      <div class="card-icon"><span class="fa-solid fa-user-secret fa-fw"></span></div>
+      <div>
+        <div class="card-title">Task 9 – Поиск виноватого</div>
+        <div class="card-desc">Проанализируйте ошибку 400 и найдите причину.</div>
+      </div>
+    </div>
+    <span class="card-tag">Analysis</span>
+  </a>
+
+  <!-- ✅ Task 10 -->
+  <a href="/task10" class="card">
+    <div class="card-header">
+      <div class="card-icon"><span class="fa-solid fa-sitemap fa-fw"></span></div>
+      <div>
+        <div class="card-title">Task 10 – Ошибка в GraphQL</div>
+        <div class="card-desc">Проанализируйте ошибку отсутствующей переменной.</div>
+      </div>
+    </div>
+    <span class="card-tag">GraphQL</span>
+  </a>
+</main>
+
+
+    <footer>
+      <p>iddqdidkfa</p>
+    </footer>
+  </div>
+</body>
+</html>

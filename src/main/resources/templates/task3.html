@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <title>Task 3 – Schema Explorer</title>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    body { margin: 0; display: flex; height: 100vh; font-family: 'Roboto', sans-serif; background-color: #f4f4f8; }
+    .left { flex: 0 0 420px; border-right: 1px solid #e2e8f0; padding: 1rem; overflow: auto; background-color: #ffffff; }
+    .right { flex: 1; display: flex; flex-direction: column; justify-content: space-between; padding: 1rem; }
+    textarea, code { font-family: monospace; padding: 0.5rem; border-radius: 4px; border: 1px solid #ccc; resize: none; }
+    textarea { height: 70%; margin-bottom: 1rem; }
+    button { padding: 0.4rem 1rem; border: none; border-radius: 4px; background-color: #6366f1; color: white; cursor: pointer; transition: background-color 0.2s; }
+    button:hover { background-color: #5258c4; }
+    code { background-color: #fafafa; padding: 0.5rem; white-space: pre-wrap; display: block; height: 30%; overflow-y: auto; }
+    h2 { color: #333; margin-bottom: 1rem; }
+    ul { list-style: none; padding: 0; }
+    li { padding: 0.5rem; border-bottom: 1px solid #eee; cursor: pointer; transition: color 0.2s; }
+    li:last-child { border-bottom: none; }
+    li:hover { color: #6366f1; }
+    .result-passed { color: #2a9d8f; }
+    .result-failed { color: #e74a3b; }
+  </style>
+</head>
+<body>
+  <div class="left">
+    <h2>GraphQL Schema</h2>
+    <pre style="font-size:14px">
+type Query {
+  user(id: ID!): User
+  posts: [Post!]!
+}
+type Mutation {
+  createPost(input: PostInput!): Post!
+}
+type User {
+  id: ID!
+  name: String!
+}
+type Post {
+  id: ID!
+  title: String!
+  body: String!
+  author: User!
+}
+input PostInput {
+  title: String!
+  body: String!
+}
+    </pre>
+  </div>
+
+  <div class="right">
+    <textarea id="query" placeholder="Write GraphQL query here..."></textarea>
+    <button onclick="runQuery()">▶ Run</button>
+    <code id="result">Result will appear here...</code>
+    <div>
+      <h3>Check-list</h3>
+      <ul id="checklist">
+        <li data-test="user">Get user by id = 1</li>
+        <li data-test="posts">Get list of posts with authors</li>
+        <li data-test="create">Create a new post</li>
+      </ul>
+    </div>
+  </div>
+
+<script>
+const tests = {
+  async user() {
+    const res = await sendQuery(`query{user(id:1){id name}}`);
+    return res.data?.user?.id === "1" && res.data?.user?.name === "Alice";
+  },
+  async posts() {
+    const res = await sendQuery(`query{posts{id title author{name}}}`);
+    return Array.isArray(res.data?.posts) && res.data.posts.every(p => p.author?.name);
+  },
+  async create() {
+    const res = await sendQuery(
+      `mutation{createPost(input:{title:"Test",body:"Body"}){id title}}`
+    );
+    return res.data?.createPost?.id && res.data.createPost.title === "Test";
+  }
+};
+
+async function sendQuery(q) {
+  const r = await fetch('/task3/graphql', {
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({query: q})
+  });
+  return r.json();
+}
+
+async function runQuery() {
+  const q = document.getElementById('query').value;
+  const res = await fetch('/task3/graphql', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({query: q})
+  });
+  const json = await res.json();
+  document.getElementById('result').textContent = JSON.stringify(json, null, 2);
+}
+
+function copyReport() {
+  const lines = [...document.querySelectorAll('#checklist li')].map(li => li.textContent);
+  navigator.clipboard.writeText(lines.join('\n'));
+  alert("Report copied to buffer!");
+}
+</script>
+</body>
+</html>

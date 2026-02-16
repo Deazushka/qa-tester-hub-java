@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="utf-8"/>
+  <title>Task 4 – Image Like / Dislike</title>
+  <style>
+    body { font-family: system-ui, sans-serif; margin: 0; padding: 2rem; background:#f8fafc; }
+    .wrapper { max-width: 600px; margin: auto; }
+    .card { margin-bottom: 2rem; text-align:center; }
+    img { max-width: 100%; border-radius:.5rem; box-shadow:0 4px 12px rgba(0,0,0,.1); }
+    .radio-group { margin-top:.5rem; font-size:1.1rem; }
+    .radio-group label { margin: 0 .5rem; cursor:pointer; }
+    #submitBtn {
+      position: fixed; bottom: 20px; right: 20px;
+      padding: .75rem 1.5rem; background:#6366f1; color:#fff;
+      border:none; border-radius:.5rem; cursor:pointer; display:none;
+    }
+  </style>
+</head>
+<body>
+  <div class="wrapper">
+    <h1>Оцените изображения</h1>
+
+    <form id="voteForm">
+      <div class="card" th:each="img : ${images}">
+        <img th:src="${img}" alt="img">
+        <div class="radio-group">
+          <label>
+            <input type="radio" th:name="${img}" value="good" required>
+            👍 Good
+          </label>
+          <label>
+            <input type="radio" th:name="${img}" value="bad">
+            👎 Bad
+          </label>
+        </div>
+      </div>
+    </form>
+
+    <button id="submitBtn" onclick="sendVotes()">Отправить ответ</button>
+  </div>
+
+</body>
+</html>

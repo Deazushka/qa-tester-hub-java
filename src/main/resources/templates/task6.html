@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <title>Task 6 – Bet-Builder Flag Rules Check</title>
+  <style>
+    body{
+      font-family:system-ui, sans-serif;
+      background:#f8fafc;
+      color:#1e293b;
+      margin:0;
+      padding:2rem;
+    }
+    .wrapper{
+      max-width:900px;
+      margin:auto;
+      background:#fff;
+      padding:2rem 2.5rem;
+      border-radius:.75rem;
+      box-shadow:0 4px 14px rgba(0,0,0,.08);
+    }
+    h1{margin-bottom:1rem}
+    h2{margin:1.5rem 0 .5rem}
+    code,pre{
+      background:#f1f5f9;
+      padding:.2rem .4rem;
+      border-radius:.25rem;
+      font-size:.9rem;
+    }
+    pre{
+      white-space:pre-wrap;
+      padding:1rem;
+    }
+    ul{margin:.5rem 0 1rem 1.5rem}
+    li{margin:.25rem 0}
+    .checklist{background:#f0f9ff;border-left:4px solid #0ea5e9;padding:1rem 1.5rem;margin-top:1rem}
+
+    /* новое поле */
+    .logic-box{
+      margin-top:2rem;
+    }
+    textarea{
+      width:100%;
+      min-height:180px;
+      padding:.75rem;
+      border:1px solid #cbd5e1;
+      border-radius:.5rem;
+      font-family:system-ui,monospace;
+      font-size:.95rem;
+      resize:vertical;
+    }
+    .save-btn{
+      margin-top:.5rem;
+      padding:.5rem 1rem;
+      border:none;
+      background:#6366f1;
+      color:#fff;
+      border-radius:.5rem;
+      cursor:pointer;
+    }
+    .save-btn:disabled{background:#a5b4fc;cursor:not-allowed;}
+  </style>
+</head>
+<body>
+  <div class="wrapper">
+    <h1>Task 6 – Bet-Builder Flag Rules Check</h1>
+
+    <!-- оригинальное ТЗ без изменений -->
+    <pre style="background:#fef2f2;border-left:4px solid #f43f5e">
+Currently, for each event, the web-line returns the is_bet_builder flag, which is used to display the bet-builder icon in the list of events. New rules have now appeared for soccer, and there are issues with displaying the icon since the rules are tied to a list of permissible tournaments.
+
+It is necessary to consider this list when calculating the value of this flag. To do this, the following steps are required (at the moment, this is required only for soccer.):
+
+Retrieve the list of tournaments with sparse RECALC_COEFFS rules (api/v1/bet-builder/recalc_coeffs_tournaments).
+
+Within the event, check its membership in the list of tournaments (if the list is not empty; if empty, all tournaments are included). If the event belongs to a tournament and has markets that satisfy the rules, then is_bet_builder=true. If the event does not belong to a tournament, you need to exclude the RECALC_COEFFS rules from the list of rules and check that the list of markets satisfying the rules is not empty. If empty, is_bet_builder=false.
+    </pre>
+
+    <!-- поле для схемы / текста -->
+    <div class="logic-box">
+      <h2>Опишите логику задачи или нарисуйте схему</h2>
+      <textarea id="logicField" placeholder="Можно текстом, можно ASCII-графикой, можно псевдокодом…"></textarea>
+      <br>
+    </div>
+
+    <p style="margin-top:2rem;font-weight:600;">Удачи в тестировании!</p>
+  </div>
+
+
+</body>
+</html>

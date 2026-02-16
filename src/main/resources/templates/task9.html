@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="ru">
+<head>
+    <meta charset="utf-8"/>
+    <title>Task 9 – Frontend/Backend Mismatch</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        /* Стили остаются без изменений */
+        :root {
+            --bg: #f8fafc; --card: #ffffff; --border: #e2e8f0;
+            --text-primary: #1e293b; --text-secondary: #64748b;
+            --accent: #4f46e5; --accent-dark: #4338ca;
+            --red: #ef4444; --green: #10b981;
+            --shadow: 0 4px 6px -1px rgba(0,0,0,.07 ), 0 2px 4px -2px rgba(0,0,0,.07);
+        }
+        body { font-family: 'Inter', sans-serif; background-color: var(--bg); color: var(--text-primary); display: flex; justify-content: center; align-items: center; min-height: 100vh; }
+        .container { max-width: 500px; width: 100%; margin: 2rem; }
+        .card { background: var(--card); padding: 2rem; border-radius: 0.5rem; box-shadow: var(--shadow); }
+        h1 { font-size: 1.75rem; margin-bottom: 1.5rem; }
+        .form-group { margin-bottom: 1.5rem; }
+        label { display: block; font-weight: 500; margin-bottom: 0.5rem; }
+        input { width: 100%; padding: 0.75rem; border: 1px solid var(--border); border-radius: 0.5rem; font-size: 1rem; box-sizing: border-box; }
+        button { width: 100%; background: var(--accent); color: white; border: none; padding: 0.75rem; border-radius: 0.5rem; font-size: 1rem; cursor: pointer; transition: background-color 0.2s; }
+        button:hover { background-color: var(--accent-dark); }
+        #response { margin-top: 1.5rem; padding: 1rem; border-radius: 0.5rem; font-family: monospace; word-break: break-all; display: none; }
+        #response.success { background-color: #d1fae5; color: #065f46; border: 1px solid #a7f3d0; }
+        #response.error { background-color: #fee2e2; color: #991b1b; border: 1px solid #fecaca; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="card">
+            <h1>Задание 9: Кто виноват?</h1>
+            <p style="color: var(--text-secondary); margin-bottom: 1.5rem;">"Введите имя пользователя и нажмите "Отправить". Форма вернет ошибку. Ваша задача —  определить, где находится проблема и объяснить почему."</p>
+
+            <div class="form-group">
+                <label for="username">Имя пользователя</label>
+                <input type="text" id="username" value="testuser">
+            </div>
+
+            <button id="submitBtn">Отправить</button>
+
+            <div id="response"></div>
+        </div>
+    </div>
+
+    <script>
+        const submitBtn = document.getElementById('submitBtn');
+        const responseDiv = document.getElementById('response');
+
+        submitBtn.addEventListener('click', async () => {
+            try {
+                // --- "ОШИБКА" ФРОНТЕНДА ---
+                // Фронтенд отправляет POST-запрос, но ЗАБЫВАЕТ прикрепить тело (body).
+                const response = await fetch('/api/task9', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                    // Тело запроса (body) намеренно отсутствует
+                });
+
+                const result = await response.json();
+                responseDiv.style.display = 'block';
+                responseDiv.textContent = JSON.stringify(result, null, 2);
+
+                if (response.ok) {
+                    responseDiv.className = 'success';
+                } else {
+                    responseDiv.className = 'error';
+                }
+
+            } catch (err) {
+                responseDiv.style.display = 'block';
+                responseDiv.className = 'error';
+                responseDiv.textContent = `Сетевая ошибка: ${err.message}`;
+            }
+        });
+    </script>
+</body>
+</html>

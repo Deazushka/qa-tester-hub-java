@@ -1,0 +1,369 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>QA Challenge: User Registration Form</title>
+  <style>
+    :root {
+      --primary: #4f46e5;
+      --error: #dc2626;
+      --success: #16a34a;
+      --border: #e5e7eb;
+      --text: #111827;
+      --bg: #f9fafb;
+      --surface: #ffffff;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, sans-serif;
+      line-height: 1.5;
+      color: var(--text);
+      background-color: var(--bg);
+      margin: 0;
+      padding: 2rem;
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+    }
+
+    .card {
+      background: var(--surface);
+      border-radius: 1rem;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+      padding: 2.5rem;
+      width: 100%;
+      max-width: 800px;
+      margin: 1rem;
+      position: relative;
+    }
+
+    /* Modal styles */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.5);
+      z-index: 1000;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .modal-content {
+      background-color: white;
+      padding: 2rem;
+      border-radius: 0.5rem;
+      max-width: 400px;
+      width: 90%;
+      text-align: center;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+      animation: modalFadeIn 0.3s ease-out;
+    }
+
+    @keyframes modalFadeIn {
+      from { opacity: 0; transform: translateY(-20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .modal-icon {
+      font-size: 3rem;
+      color: var(--success);
+      margin-bottom: 1rem;
+    }
+
+    .modal-close {
+      background-color: var(--primary);
+      color: white;
+      border: none;
+      border-radius: 0.25rem;
+      padding: 0.5rem 1rem;
+      margin-top: 1.5rem;
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+
+    .modal-close:hover {
+      background-color: #4338ca;
+    }
+
+    /* Rest of your existing styles... */
+    h1 {
+      color: var(--primary);
+      font-size: 1.5rem;
+      font-weight: 600;
+      margin: 0 0 2rem;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 1.25rem;
+    }
+
+    .form-field {
+      margin-bottom: 1rem;
+    }
+
+    label {
+      display: block;
+      font-size: 0.875rem;
+      font-weight: 500;
+      margin-bottom: 0.5rem;
+      color: var(--text);
+    }
+
+    input, select, textarea {
+      width: 100%;
+      padding: 0.625rem 0.75rem;
+      border: 1px solid var(--border);
+      border-radius: 0.5rem;
+      font-size: 0.875rem;
+      transition: all 0.15s ease;
+    }
+
+    input:focus, select:focus, textarea:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+    }
+
+    textarea {
+      min-height: 6rem;
+      resize: vertical;
+    }
+
+    .error-message {
+      color: var(--error);
+      font-size: 0.75rem;
+      margin-top: 0.25rem;
+      display: none;
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    button {
+      background-color: var(--primary);
+      color: white;
+      border: none;
+      border-radius: 0.5rem;
+      padding: 0.75rem 1.5rem;
+      font-size: 0.875rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background-color 0.2s;
+      grid-column: 1 / -1;
+      margin-top: 0.5rem;
+      width: fit-content;
+      justify-self: end;
+    }
+
+    button:hover {
+      background-color: #4338ca;
+    }
+
+    .result {
+      margin-top: 1.5rem;
+      padding: 1rem;
+      border-radius: 0.5rem;
+      background-color: #f3f4f6;
+      display: none;
+    }
+
+    .radio-group {
+      display: flex;
+      gap: 1rem;
+      margin-top: 0.25rem;
+    }
+
+    .checkbox-label {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      cursor: pointer;
+    }
+
+    @media (max-width: 640px) {
+      .card {
+        padding: 1.5rem;
+      }
+
+      .form-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>QA Challenge: User Registration Form</h1>
+
+    <form id="userForm" method="POST" enctype="multipart/form-data" class="form-grid">
+      <!-- Все поля формы остаются без изменений -->
+      <div class="form-field">
+        <label for="name">Full Name (2-50 chars)</label>
+        <input id="name" type="text" maxlength="50" required>
+        <div class="error-message" id="name-error"></div>
+      </div>
+
+
+      <div class="form-field">
+        <label for="email">Email</label>
+        <input id="email" type="text">
+        <div class="error-message" id="email-error"></div>
+      </div>
+
+      <div class="form-field">
+        <label for="age">Age</label>
+        <input id="age" type="number">
+        <div class="error-message" id="age-error"></div>
+      </div>
+
+      <div class="form-field">
+        <label for="phone">Phone</label>
+        <input id="phone" type="tel" placeholder="+7 (999) 000-00-00" pattern="\d{10}">
+        <div class="error-message" id="phone-error"></div>
+      </div>
+
+      <div class="form-field">
+        <label for="country_code">Country Code</label>
+        <input id="country_code" maxlength="2" size="2">
+        <div class="error-message" id="country-error"></div>
+      </div>
+
+      <div class="form-field" style="grid-column: span 2">
+        <label for="address">Address</label>
+        <textarea id="address" rows="3" maxlength="500"></textarea>
+      </div>
+
+      <div class="form-field" style="grid-column: span 2">
+        <label for="bio">Bio</label>
+        <textarea id="bio" rows="1" maxlength="2000"></textarea>
+      </div>
+
+      <div class="form-field">
+        <label for="password">Password</label>
+        <input id="password" type="password">
+        <div class="error-message" id="password-error"></div>
+      </div>
+
+      <div class="form-field">
+        <label for="confirm">Confirm Password</label>
+        <input id="confirm" type="password">
+        <div class="error-message" id="confirm-error"></div>
+      </div>
+
+      <div class="form-field">
+        <label for="height">Height (cm)</label>
+        <input id="height" type="number" min="200" max="100">
+        <div class="error-message" id="height-error"></div>
+      </div>
+
+      <div class="form-field">
+        <label for="birthdate">Birthdate</label>
+        <input id="birthdate" type="date" max="1999-12-31">
+        <div class="error-message" id="birthdate-error"></div>
+      </div>
+
+      <div class="form-field">
+        <label class="checkbox-label">
+          <input id="agree" type="checkbox"> I agree to terms
+        </label>
+        <div class="error-message" id="agree-error"></div>
+      </div>
+
+      <div class="form-field">
+        <label>Gender</label>
+        <div class="radio-group">
+          <label><input type="radio" value="M"> Male</label>
+          <label><input type="radio" value="F"> Female</label>
+        </div>
+        <div class="error-message" id="gender-error"></div>
+      </div>
+
+      <div class="form-field">
+        <label for="city">City</label>
+        <select id="city">
+          <option>-- select --</option>
+          <option>Moscow</option>
+          <option>Saint Petersburg</option>
+        </select>
+        <div class="error-message" id="city-error"></div>
+      </div>
+
+      <div class="form-field">
+        <label for="avatar">Profile Photo</label>
+        <input id="avatar" type="file">
+        <div class="error-message" id="avatar-error"></div>
+      </div>
+
+      <div class="form-field">
+        <label for="color">Favorite Color</label>
+        <input id="color" type="color">
+      </div>
+
+      <div class="form-field">
+        <label for="exp">Experience (years) <span id="exp-value">0</span></label>
+        <input id="exp" type="range" min="0" max="50">
+      </div>
+
+      <input id="hiddenField" type="hidden" value="secret123">
+
+      <button type="button" onclick="submitForm()">Submit</button>
+    </form>
+
+    <div id="result" class="result"></div>
+  </div>
+
+  <!-- Success Modal -->
+  <div id="successModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-icon">✓</div>
+      <h2>Success!</h2>
+      <p>Your form has been submitted successfully.</p>
+      <button class="modal-close" onclick="closeModal()">Close</button>
+    </div>
+  </div>
+
+<script>
+    function submitForm() {
+      const data = new FormData(document.getElementById('userForm'));
+
+      // Симуляция успешной отправки (в реальном коде здесь будет fetch)
+      setTimeout(() => {
+        showModal();
+      }, 1000);
+
+      // Оригинальный код с багами (оставлен для тестирования)
+      fetch('/api/add_user', { method: 'POST', body: data })
+        .then(r => r.text())
+        .then(t => document.getElementById('result').innerHTML = t)
+        .catch(console.error);
+    }
+
+    function showModal() {
+      document.getElementById('successModal').style.display = 'flex';
+    }
+
+    function closeModal() {
+      document.getElementById('successModal').style.display = 'none';
+    }
+
+    document.getElementById('exp').addEventListener('input', function() {
+      document.getElementById('exp-value').textContent = this.value;
+    });
+
+    // Закрытие модального окна при клике вне его
+    window.addEventListener('click', function(event) {
+      const modal = document.getElementById('successModal');
+      if (event.target === modal) {
+        closeModal();
+      }
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="ru">
+<head>
+    <meta charset="utf-8"/>
+    <title>Task 10 – GraphQL Missing Variable</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        /* Стили остаются без изменений */
+        :root {
+            --bg: #f8fafc; --card: #ffffff; --border: #e2e8f0;
+            --text-primary: #1e293b; --text-secondary: #64748b;
+            --accent: #4f46e5; --accent-dark: #4338ca;
+            --red: #ef4444; --shadow: 0 4px 6px -1px rgba(0,0,0,.07 ), 0 2px 4px -2px rgba(0,0,0,.07);
+        }
+        body { font-family: 'Inter', sans-serif; background-color: var(--bg); color: var(--text-primary); display: flex; justify-content: center; align-items: center; min-height: 100vh; }
+        .container { max-width: 600px; width: 100%; margin: 2rem; }
+        .card { background: var(--card); padding: 2rem; border-radius: 0.5rem; box-shadow: var(--shadow); }
+        h1 { font-size: 1.75rem; margin-bottom: 1.5rem; }
+        .event-info { background: #f9fafb; border: 1px solid var(--border); padding: 1rem; border-radius: 0.5rem; margin-bottom: 1.5rem; }
+        .event-info p { margin: 0 0 0.5rem; }
+        button { background: var(--accent); color: white; border: none; padding: 0.75rem 1.5rem; border-radius: 0.5rem; font-size: 1rem; cursor: pointer; transition: background-color 0.2s; }
+        button:hover { background-color: var(--accent-dark); }
+        #response { margin-top: 1.5rem; padding: 1rem; border-radius: 0.5rem; font-family: monospace; word-break: break-all; display: none; background-color: #fee2e2; color: #991b1b; border: 1px solid #fecaca; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="card">
+            <h1>Задание 10: Ошибка в GraphQL</h1>
+            <!--<p style="color: var(--text-secondary); margin-bottom: 1.5rem;">При нажатии на кнопку "Редактировать" для сохранения изменений возникает ошибка. Отправляется большое количество данных.</p>-->
+            <p style="color: var(--text-secondary); margin-bottom: 1.5rem;"><strong>Задача:</strong> Проанализируйте сетевой запрос и определите на чьей стороне ошибка.</p>
+
+            <button id="submitBtn">Редактировать событие</button>
+
+            <div id="response"></div>
+        </div>
+    </div>
+
+  <!-- Файл task10.html -->
+<!-- HTML и CSS остаются без изменений -->
+<!-- ... -->
+<script>
+    const submitBtn = document.getElementById('submitBtn');
+    const responseDiv = document.getElementById('response');
+
+    submitBtn.addEventListener('click', async () => {
+        const mutation = `
+            mutation EditEvent(
+                $id: ID!, $source: String, $status: Status, $scheduled: String,
+                $competitors: [CompetitorInput], $marketIds: [Int], $priority: Int,
+                $isLive: Boolean, $notes: String, $descType: DescType!
+            ) {
+                editEvent(
+                    id: $id, source: $source, status: $status, scheduled: $scheduled,
+                    competitors: $competitors, marketIds: $marketIds, priority: $priority,
+                    isLive: $isLive, notes: $notes, descType: $descType
+                ) {
+                    id
+                }
+            }
+        `;
+
+        const variables = {
+            id: "evt-12345",
+            source: "BR",
+            status: "ACTIVE",
+            scheduled: new Date().toISOString(),
+            competitors: [
+                { id: "comp-1", name: "Ribecai, Michele" },
+                { id: "comp-2", name: "Hasson, Jordan" }
+            ],
+            marketIds: [1001, 1002, 1005, 2003, 5010],
+            priority: 2,
+            isLive: true,
+            notes: "User confirmed the changes via UI."
+
+        };
+
+        try {
+            const response = await fetch('/api/task10/graphql', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ query: mutation, variables: variables })
+            });
+
+            const result = await response.json();
+            responseDiv.style.display = 'block';
+
+            // --- ИЗМЕНЕНИЕ ЗДЕСЬ ---
+            // Теперь мы просто показываем то, что вернул сервер.
+            // Если это ошибка 400, то `result` будет {"error": "..."}.
+            // Если успех 200, то `result` будет {"data": ...}.
+            responseDiv.textContent = JSON.stringify(result, null, 2);
+
+        } catch (err) {
+            responseDiv.style.display = 'block';
+            responseDiv.textContent = `Сетевая ошибка: ${err.message}`;
+        }
+    });
+</script>
+
+</body>
+</html>

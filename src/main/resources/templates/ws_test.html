@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>WS Test</title>
+  <style>
+    body{font-family:Arial;margin:40px}#log{border:1px solid #ccc;height:200px;overflow-y:scroll;padding:5px}
+    .sent{color:blue}.recv{color:green}.error{color:red}
+  </style>
+</head>
+<body>
+  <h1>WebSocket playground</h1>
+  <input id="url" value="ws://localhost:5000/ws" size="50">
+  <button onclick="connect()">Connect</button>
+  <button onclick="disconnect()">Disconnect</button><br><br>
+
+  <textarea id="msg" rows="3" cols="50" placeholder='{"type":"text","content":"hello"}'></textarea><br>
+  <button onclick="send()">Send</button>
+
+  <h2>Log</h2>
+  <div id="log"></div>
+
+  <script>
+    let ws;
+    function log(txt, cls='') {
+      const d=document.getElementById('log');
+      d.innerHTML+=`<div class="${cls}">${new Date().toLocaleTimeString()} ${txt}</div>`;
+      d.scrollTop=d.scrollHeight;
+    }
+    function connect() {
+      ws=new WebSocket(document.getElementById('url').value);
+      ws.onopen=()=>log('Connected','sent');
+      ws.onmessage=e=>log('← '+e.data,'recv');
+      ws.onclose=e=>log('Closed '+e.code,'error');
+      ws.onerror=e=>log('Error','error');
+    }
+    function disconnect(){ ws?.close(1000,'User'); }
+    function send(){
+      const m=document.getElementById('msg').value;
+      ws?.send(m);
+      log('→ '+m,'sent');
+    }
+  </script>
+</body>
+</html>
