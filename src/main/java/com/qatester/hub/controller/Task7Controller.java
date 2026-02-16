@@ -2,12 +2,9 @@ package com.qatester.hub.controller;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import jakarta.servlet.http.HttpServletRequest;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
-import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.util.*;
@@ -15,9 +12,8 @@ import java.util.*;
 @Controller
 public class Task7Controller {
 
-    private final Map<String, Long> recentRequestHashes = new HashMap<>();
+    private final Map<String, Long> recentRequestHashes = Collections.synchronizedMap(new HashMap<>());
     private final Random random = new Random();
-    private final ObjectMapper objectMapper = new ObjectMapper();
 
     @GetMapping("/task7")
     public String task7() {
@@ -25,42 +21,39 @@ public class Task7Controller {
     }
 
     @PostMapping("/api/v2/coupon/brand/{brandId}/bet/place")
-    public ResponseEntity<Map<String, Object>> placeBet(
+    @ResponseBody
+    public Map<String, Object> placeBet(
             @PathVariable String brandId,
-            HttpServletRequest request) throws IOException {
+            @RequestHeader(value = "Content-Type", required = false) String contentType,
+            @RequestBody byte[] body) {
 
-        String contentType = request.getContentType();
         if (contentType == null || !contentType.contains("application/json")) {
-            return ResponseEntity.ok(Map.of(
-                    "accepted", Collections.emptyList(),
-                    "error", List.of(Map.of("code", 100, "message", "Invalid JSON"))
-            ));
+            return Map.of("accepted", Collections.emptyList(),
+                    "error", List.of(Map.of("code", 100, "message", "Invalid JSON")));
         }
 
-        String rawBody = new String(request.getInputStream().readAllBytes(), StandardCharsets.UTF_8);
+        String rawBody = new String(body, StandardCharsets.UTF_8);
 
         List<Map<String, Object>> bets;
         try {
-            bets = objectMapper.readValue(rawBody, new TypeReference<List<Map<String, Object>>>() {});
+            ObjectMapper mapper = new ObjectMapper();
+            bets = mapper.readValue(rawBody, new TypeReference<List<Map<String, Object>>>() {});
             if (bets == null || bets.isEmpty()) {
-                throw new IllegalArgumentException("Expected non-empty array");
+                return Map.of("accepted", Collections.emptyList(),
+                        "error", List.of(Map.of("code", 100, "message", "Invalid request format")));
             }
         } catch (Exception e) {
-            return ResponseEntity.ok(Map.of(
-                    "accepted", Collections.emptyList(),
-                    "error", List.of(Map.of("code", 100, "message", "Invalid request format"))
-            ));
+            return Map.of("accepted", Collections.emptyList(),
+                    "error", List.of(Map.of("code", 100, "message", "Invalid request format")));
         }
 
         Map<String, Object> firstBet = bets.get(0);
         Object betRequestIdObj = firstBet.get("bet_request_id");
-        String betRequestId = betRequestIdObj != null ? betRequestIdObj.toString() : null;
+        String betRequestId = betRequestIdObj != null ? String.valueOf(betRequestIdObj) : null;
 
         if (betRequestId == null || betRequestId.isEmpty()) {
-            return ResponseEntity.ok(Map.of(
-                    "accepted", Collections.emptyList(),
-                    "error", List.of(Map.of("code", 101, "message", "Missing bet_request_id"))
-            ));
+            return Map.of("accepted", Collections.emptyList(),
+                    "error", List.of(Map.of("code", 101, "message", "Missing bet_request_id")));
         }
 
         String bodyHash = sha256(rawBody);
@@ -68,8 +61,7 @@ public class Task7Controller {
 
         Long lastTime = recentRequestHashes.get(bodyHash);
         if (lastTime != null && currentTime - lastTime < 5) {
-            return ResponseEntity.ok(Map.of(
-                    "accepted", Collections.emptyList(),
+            return Map.of("accepted", Collections.emptyList(),
                     "error", List.of(Map.of(
                             "bet_request_id", betRequestId,
                             "code", 102,
@@ -77,21 +69,19 @@ public class Task7Controller {
                             "bet_id", "0",
                             "alt_stake", null,
                             "vip_request_available", null
-                    ))
-            ));
+                    )));
         }
 
         recentRequestHashes.put(bodyHash, currentTime);
         String fakeBetId = String.valueOf(2594267000000000000L + random.nextInt(1000000000));
 
-        return ResponseEntity.ok(Map.of(
-                "accepted", List.of(Map.of(
+        return Map.of("accepted", List.of(Map.of(
                         "bet_request_id", betRequestId,
                         "bet_id", fakeBetId,
                         "bonus_id", null
                 )),
                 "error", Collections.emptyList()
-        ));
+        );
     }
 
     private String sha256(String input) {
@@ -106,7 +96,7 @@ public class Task7Controller {
             }
             return hexString.toString();
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            return String.valueOf(input.hashCode());
         }
     }
 }
