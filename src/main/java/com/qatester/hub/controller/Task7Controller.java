@@ -2,18 +2,18 @@ package com.qatester.hub.controller;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.util.*;
 
-@Controller
+@RestController
 public class Task7Controller {
 
     private final Map<String, Long> recentRequestHashes = Collections.synchronizedMap(new HashMap<>());
     private final Random random = new Random();
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     @GetMapping("/task7")
     public String task7() {
@@ -21,39 +21,44 @@ public class Task7Controller {
     }
 
     @PostMapping("/api/v2/coupon/brand/{brandId}/bet/place")
-    @ResponseBody
     public Map<String, Object> placeBet(
             @PathVariable String brandId,
             @RequestHeader(value = "Content-Type", required = false) String contentType,
-            @RequestBody byte[] body) {
+            @RequestBody String rawBody) {
 
         if (contentType == null || !contentType.contains("application/json")) {
-            return Map.of("accepted", Collections.emptyList(),
-                    "error", List.of(Map.of("code", 100, "message", "Invalid JSON")));
+            Map<String, Object> result = new LinkedHashMap<>();
+            result.put("accepted", Collections.emptyList());
+            result.put("error", Collections.singletonList(Map.of("code", 100, "message", "Invalid JSON")));
+            return result;
         }
-
-        String rawBody = new String(body, StandardCharsets.UTF_8);
 
         List<Map<String, Object>> bets;
         try {
-            ObjectMapper mapper = new ObjectMapper();
-            bets = mapper.readValue(rawBody, new TypeReference<List<Map<String, Object>>>() {});
+            bets = objectMapper.readValue(rawBody, new TypeReference<List<Map<String, Object>>>() {});
             if (bets == null || bets.isEmpty()) {
-                return Map.of("accepted", Collections.emptyList(),
-                        "error", List.of(Map.of("code", 100, "message", "Invalid request format")));
+                Map<String, Object> result = new LinkedHashMap<>();
+                result.put("accepted", Collections.emptyList());
+                result.put("error", Collections.singletonList(Map.of("code", 100, "message", "Invalid request format")));
+                return result;
             }
         } catch (Exception e) {
-            return Map.of("accepted", Collections.emptyList(),
-                    "error", List.of(Map.of("code", 100, "message", "Invalid request format")));
+            Map<String, Object> result = new LinkedHashMap<>();
+            result.put("accepted", Collections.emptyList());
+            result.put("error", Collections.singletonList(Map.of("code", 100, "message", "Invalid request format")));
+            return result;
         }
 
         Map<String, Object> firstBet = bets.get(0);
-        Object betRequestIdObj = firstBet.get("bet_request_id");
-        String betRequestId = betRequestIdObj != null ? String.valueOf(betRequestIdObj) : null;
+        String betRequestId = firstBet.get("bet_request_id") != null 
+                ? String.valueOf(firstBet.get("bet_request_id")) 
+                : null;
 
         if (betRequestId == null || betRequestId.isEmpty()) {
-            return Map.of("accepted", Collections.emptyList(),
-                    "error", List.of(Map.of("code", 101, "message", "Missing bet_request_id")));
+            Map<String, Object> result = new LinkedHashMap<>();
+            result.put("accepted", Collections.emptyList());
+            result.put("error", Collections.singletonList(Map.of("code", 101, "message", "Missing bet_request_id")));
+            return result;
         }
 
         String bodyHash = sha256(rawBody);
@@ -61,27 +66,30 @@ public class Task7Controller {
 
         Long lastTime = recentRequestHashes.get(bodyHash);
         if (lastTime != null && currentTime - lastTime < 5) {
-            return Map.of("accepted", Collections.emptyList(),
-                    "error", List.of(Map.of(
-                            "bet_request_id", betRequestId,
-                            "code", 102,
-                            "message", "You have already placed this bet",
-                            "bet_id", "0",
-                            "alt_stake", null,
-                            "vip_request_available", null
-                    )));
+            Map<String, Object> result = new LinkedHashMap<>();
+            Map<String, Object> error = new LinkedHashMap<>();
+            error.put("bet_request_id", betRequestId);
+            error.put("code", 102);
+            error.put("message", "You have already placed this bet");
+            error.put("bet_id", "0");
+            error.put("alt_stake", null);
+            error.put("vip_request_available", null);
+            result.put("accepted", Collections.emptyList());
+            result.put("error", Collections.singletonList(error));
+            return result;
         }
 
         recentRequestHashes.put(bodyHash, currentTime);
         String fakeBetId = String.valueOf(2594267000000000000L + random.nextInt(1000000000));
 
-        return Map.of("accepted", List.of(Map.of(
-                        "bet_request_id", betRequestId,
-                        "bet_id", fakeBetId,
-                        "bonus_id", null
-                )),
-                "error", Collections.emptyList()
-        );
+        Map<String, Object> result = new LinkedHashMap<>();
+        Map<String, Object> accepted = new LinkedHashMap<>();
+        accepted.put("bet_request_id", betRequestId);
+        accepted.put("bet_id", fakeBetId);
+        accepted.put("bonus_id", null);
+        result.put("accepted", Collections.singletonList(accepted));
+        result.put("error", Collections.emptyList());
+        return result;
     }
 
     private String sha256(String input) {
