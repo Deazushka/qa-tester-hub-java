@@ -2,10 +2,13 @@ package com.qatester.hub.controller;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.util.*;
 
@@ -24,16 +27,17 @@ public class Task7Controller {
     @PostMapping("/api/v2/coupon/brand/{brandId}/bet/place")
     public ResponseEntity<Map<String, Object>> placeBet(
             @PathVariable String brandId,
-            @RequestHeader(value = "Content-Type", required = false) String contentType,
-            @RequestBody String rawBody) {
+            HttpServletRequest request) throws IOException {
 
-        // Check if JSON (like Flask's request.is_json)
+        String contentType = request.getContentType();
         if (contentType == null || !contentType.contains("application/json")) {
             return ResponseEntity.ok(Map.of(
                     "accepted", Collections.emptyList(),
                     "error", List.of(Map.of("code", 100, "message", "Invalid JSON"))
             ));
         }
+
+        String rawBody = new String(request.getInputStream().readAllBytes(), StandardCharsets.UTF_8);
 
         List<Map<String, Object>> bets;
         try {
@@ -59,7 +63,6 @@ public class Task7Controller {
             ));
         }
 
-        // Hash of raw body (same as Flask)
         String bodyHash = sha256(rawBody);
         long currentTime = System.currentTimeMillis() / 1000;
 
@@ -94,7 +97,7 @@ public class Task7Controller {
     private String sha256(String input) {
         try {
             MessageDigest digest = MessageDigest.getInstance("SHA-256");
-            byte[] hash = digest.digest(input.getBytes("UTF-8"));
+            byte[] hash = digest.digest(input.getBytes(StandardCharsets.UTF_8));
             StringBuilder hexString = new StringBuilder();
             for (byte b : hash) {
                 String hex = Integer.toHexString(0xff & b);
